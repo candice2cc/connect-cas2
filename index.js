@@ -201,21 +201,34 @@ ConnectCas.prototype.core = function() {
       });
     }
 
-    if (utils.shouldIgnore(req, options)) return doNext(function(req, res, next) {
-      next();
-    });
+        // if (utils.shouldIgnore(req, options)) return doNext(function(req, res, next) {
+        //     next();
+        // });
+        var ticket = req.query && req.query.ticket || null;
+        if (utils.shouldIgnore(req, options)){
+            if(!ticket){
+                return doNext(function(req,res,next) {
+                    next();
+                })
+            }
+        };
 
-    if (method === 'GET') {
-      switch (pathname) {
-        case options.paths.validate:
-          return validate(req, res, doNext, options);
-        case that.proxyCallbackPathName:
-          return proxyCallback(req, doNext, options);
-      }
-    }
-    else if (method === 'POST' && pathname === options.paths.validate && options.slo) {
-      return slo(req, doNext, options);
-    }
+        if (method === 'GET') {
+            // switch (pathname) {
+            //  case options.paths.validate:
+            //    return validate(req, res, doNext, options);
+            //  case that.proxyCallbackPathName:
+            //    return proxyCallback(req, doNext, options);
+            // }
+            if(pathname === options.paths.validate || ticket){
+                return validate(req, res, doNext, options);
+            }else if(pathname === that.proxyCallbackPathName){
+                return proxyCallback(req, doNext, options);
+            }
+        }
+        else if (method === 'POST' && pathname === options.paths.validate && options.slo) {
+            return slo(req, doNext, options);
+        }
 
     return authenticate(req, doNext, options);
 
